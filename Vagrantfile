@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "ansible" do |ansible|
     ansible.become = true
-    ansible.galaxy_role_file = "requiremets.yml"
+    ansible.galaxy_role_file = "requirements.yml"
     ansible.playbook = "site.yml"
   end
 end

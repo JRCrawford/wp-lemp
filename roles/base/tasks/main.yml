@@ -1,0 +1,23 @@
+---
+- name: Update and upgrade all packages
+  become: true
+  apt:
+    upgrade: yes
+    update_cache: yes
+
+- name: Remove dependencies that are no longer required 
+  become: true
+  apt:
+    autoremove: yes
+
+- name: Create a default webmaster user
+  become: true
+  user:
+    name: webmaster
+    comment: Web Master
+    uid: 1100
+
+- name: Install base packages
+  apt: 
+    name: "{{ base_packages }}"
+    state: present

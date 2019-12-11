@@ -1,6 +1,4 @@
 ---
 - hosts: all
-  tasks:
-    - name: install
-      apt:
-        name: vim
+  roles: 
+    - base
