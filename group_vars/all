@@ -1,4 +1,5 @@
 ---
+# Security role configuration
 security_ssh_port: 3962
 security_ssh_permit_root_login: "no"
 security_ssh_usedns: "no"
@@ -7,3 +8,11 @@ security_autoupdate_reboot: true
 security_autoupdate_reboot_time: "01:00"
 security_autoupdate_mail_to: ""
 security_fail2ban_enabled: true
+
+# Firewall role configurationfirewall_state: started
+firewall_state: started
+firewall_enabled_at_boot: true
+firewall_allowed_tcp_ports:
+  - "3962"
+  - "80"
+  - "443"

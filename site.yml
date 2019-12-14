@@ -3,3 +3,4 @@
   roles: 
     - base
     - geerlingguy.security
+    - geerlingguy.firewall
