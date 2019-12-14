@@ -5,4 +5,5 @@
     - geerlingguy.security
     - geerlingguy.firewall
     - nginxinc.nginx
-    - geerlingguy.php    
+    - geerlingguy.php
+    - geerlingguy.redis
