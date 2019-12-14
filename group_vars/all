@@ -1,6 +1,6 @@
 ---
 # Security role configuration
-security_ssh_port: 3962
+security_ssh_port: 22
 security_ssh_permit_root_login: "no"
 security_ssh_usedns: "no"
 security_autoupdate_enabled: true
@@ -13,6 +13,7 @@ security_fail2ban_enabled: true
 firewall_state: started
 firewall_enabled_at_boot: true
 firewall_allowed_tcp_ports:
+  - "22"
   - "3962"
   - "80"
   - "443"
@@ -71,3 +72,36 @@ nginx_main_template:
   events_custom_options:
     - "multi_accept on"
   stream_enable: false
+  
+# PHP role configuration
+php_packages_extra: #
+  - php-mysql
+#  - php-xml
+  - php-xmlrpc
+#  - php-curl
+# - php-gd
+  - php-imagick
+  - php-dev
+#  - php-imap
+#  - php-mbstring
+  - php-redis
+  - php-soap
+  - php-zip
+php_enable_webserver: false
+php_default_version_debian: "7.2"
+php_install_recommends: false
+php_enable_php_fpm: true
+php_max_execution_time: "300"
+php_max_input_time: "300"
+php_upload_max_filesize: "64M"
+php_post_max_size: "64M"
+php_memory_limit: "256M"
+php_opcache_enable: "1"
+php_opcache_memory_consumption: "128"
+php_opcache_interned_strings_buffer: "8"
+php_opcache_max_accelerated_files: "4096"
+php_opcache_validate_timestamps: "1"
+php_opcache_revalidate_path: "0"
+php_opcache_revalidate_freq: "60"
+php_opcache_max_file_size: "0"
+php_opcache_enable_cli: "1"
