@@ -7,3 +7,5 @@
     - nginxinc.nginx
     - geerlingguy.php
     - geerlingguy.redis
+    - role: geerlingguy.mysql
+      become: yes
