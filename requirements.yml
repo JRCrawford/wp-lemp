@@ -1,0 +1,6 @@
+- src: geerlingguy.security
+- src: geerlingguy.firewall
+- src: geerlingguy.mysql
+- src: geerlingguy.php
+- src: geerlingguy.redis
+- src: nginxinc.nginx
