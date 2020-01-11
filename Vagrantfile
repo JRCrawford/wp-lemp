@@ -18,5 +18,8 @@ Vagrant.configure("2") do |config|
     ansible.become = true
     ansible.galaxy_role_file = "requirements.yml"
     ansible.playbook = "site.yml"
+    ansible.galaxy_command = "ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path}"
+    ansible.compatibility_mode = "2.0"
+    # ansible.raw_arguments = "-vv"
   end
 end
