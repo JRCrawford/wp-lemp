@@ -1,4 +1,7 @@
 ---
+
+domain_name: myhost.com
+
 # Security role configuration
 security_ssh_port: 22
 security_ssh_permit_root_login: "no"
@@ -26,22 +29,16 @@ nginx_install_from: os_repository
 nginx_main_template_enable: true
 nginx_main_template:
   user: webmaster
-  worker_processes: 1
-  worker_connections: 1024
-  keepalive_timeout: 20
-
-nginx_main_template:
   template_file: nginx.conf.j2
   conf_file_name: nginx.conf
   conf_file_location: /etc/nginx/
-  user: webmaster
   worker_processes: "{{ ansible_processor_vcpus }}"
   # worker_rlimit_nofile: 1024
   error_log:
     location: /var/log/nginx/error.log
     level: warn
   worker_connections: 1024
-  custom_options: 
+  custom_options:
     - "include /etc/nginx/modules-enabled/*.conf"
   http_enable: true
   http_settings:
@@ -58,21 +55,264 @@ nginx_main_template:
     tcp_nodelay: true
     keepalive_timeout: 20
     cache: false
-    rate_limit: false
+    rate_limit: true
     keyval: false
     server_tokens: "off"
   http_global_autoindex: false
-  http_custom_options: 
+  http_custom_options:
     - "types_hash_max_size 2048"
-    - "gzip on" 
+    - "gzip on"
     - "gzip_types text/plain text/css application/json application/javascript text/xml text/javascript"
     - "ssl_protocols TLSv1.2"
     - "ssl_prefer_server_ciphers on"
-    - "include /etc/nginx/sites-enabeld/*"
+    - "include /etc/nginx/sites-enabled/*"
+    - "set_real_ip_from 103.21.244.0/22"
+    - "set_real_ip_from 103.22.200.0/22"
+    - "set_real_ip_from 103.31.4.0/22"
+    - "set_real_ip_from 104.16.0.0/12"
+    - "set_real_ip_from 108.162.192.0/18"
+    - "set_real_ip_from 131.0.72.0/22"
+    - "set_real_ip_from 141.101.64.0/18"
+    - "set_real_ip_from 162.158.0.0/15"
+    - "set_real_ip_from 172.64.0.0/13"
+    - "set_real_ip_from 173.245.48.0/20"
+    - "set_real_ip_from 188.114.96.0/20"
+    - "set_real_ip_from 190.93.240.0/20"
+    - "set_real_ip_from 197.234.240.0/22"
+    - "set_real_ip_from 198.41.128.0/17"
+    - "set_real_ip_from 2400:cb00::/32"
+    - "set_real_ip_from 2405:b500::/32"
+    - "set_real_ip_from 2606:4700::/32"
+    - "set_real_ip_from 2803:f800::/32"
+    - "set_real_ip_from 2c0f:f248::/32"
+    - "set_real_ip_from 2a06:98c0::/29"
+    - "set_real_ip_from 2405:8100::/32"
+    - "real_ip_header CF-Connecting-IP"
+    - "fastcgi_cache_path /home/webmaster/{{ domain_name }}/cache levels=1:2 keys_zone=FASTCGICACHE:100m inactive=60m"
+    - "fastcgi_cache_key \"$scheme$request_method$host$request_uri\""
+    - "fastcgi_cache_use_stale error timeout invalid_header http_500"
+    - "fastcgi_ignore_headers Cache-Control Expires Set-Cookie"
+
   events_custom_options:
     - "multi_accept on"
   stream_enable: false
-  
+
+nginx_http_template_enable: true
+nginx_http_template:
+  default:
+    template_file: http/default.conf.j2
+    conf_file_name: "{{ domain_name }}.conf"
+    conf_file_location: /etc/nginx/sites-available/
+    servers:
+      non_tls:
+        listen:
+          listen_ipv4:
+            port: 80
+            opts:
+              - http2
+          listen_ipv6:
+            ip: "[::]"
+            port: 80
+            opts:
+              - http2
+        returns:
+          returns301:
+            location: /
+            code: 301
+            value: "https://{{ domain_name }}$request_uri"
+
+      www:
+        listen:
+          listen_ipv4:
+            port: 443
+            opts:
+              - http2
+          listen_ipv6:
+            ip: "[::]"
+            port: 443
+            opts:
+              - http2
+        server_name: "www.{{ domain_name }}"
+        returns:
+          returns301:
+            location: /
+            code: 301
+            value: "$scheme://{{ domain_name }}$request_uri"
+        ssl:
+          cert: "/etc/cloudflare-ssl/{{ domain_name }}.pem"
+          key: "/etc/cloudflare-ssl/{{ domain_name }}.key"
+          protocols: TLSv1.2
+          ciphers: HIGH:!aNULL:!MD5
+          prefer_server_ciphers: true
+          session_cache: shared:SSL:10m
+          session_timeout: 1h
+          disable_session_tickets: false
+          trusted_cert: /etc/ssl/certs/root_CA_cert_plus_intermediates.crt
+          stapling: true
+          stapling_verify: true
+
+      default:
+        listen:
+          listen_ipv4:
+            port: 443
+            opts:
+              - http2
+          listen_ipv6:
+            ip: "[::]"
+            port: 443
+            opts:
+              - http2
+        server_name: "{{ domain_name }}"
+        ssl:
+          cert: /etc/cloudflare-ssl/ideelnow.pem
+          key: /etc/cloudflare-ssl/ideelnow.key
+          protocols: TLSv1.2
+          ciphers: HIGH:!aNULL:!MD5
+          prefer_server_ciphers: true
+          session_cache: shared:SSL:10m
+          session_timeout: 1h
+          disable_session_tickets: false
+          trusted_cert: /etc/ssl/certs/root_CA_cert_plus_intermediates.crt
+          stapling: true
+          stapling_verify: true
+        include_files: []
+        error_page: /usr/share/nginx/html
+        access_log:
+          - name: main
+            location: /home/webmaster/{{ domain_name }}/logs/access.log
+        error_log:
+          location: /home/webmaster/{{ domain_name }}/logs/error.log
+          level: warn
+        root: /home/webmaster/{{ domain_name }}/public
+        # https_redirect: $host
+        autoindex: false
+        auth_basic: null
+        auth_basic_user_file: null
+        try_files: $uri $uri/index.html $uri.html =404
+        # auth_request: /auth
+        # auth_request_set:
+        #   name: $auth_user
+        #   value: $upstream_http_x_user
+        client_max_body_size: 256m
+        proxy_hide_headers: []  # A list of headers which shouldn't be passed to the application
+        add_headers:
+          strict_transport_security:
+            name: Strict-Transport-Security
+            value: max-age=15768000; includeSubDomains
+            always: true
+          frame_options:
+            name: X-Frame-Options
+            value: SAMEORIGIN
+            always: true
+          xss_protection:
+            name: X-XSS-Protection
+            value: 1; mode=block
+            always: true
+          referrer_policy:
+            name: Referrer-Policy
+            value: origin-when-cross-origin
+            always: true
+          content_type_options:
+            name: X-Content-Type-Options
+            value: nosniff
+            always: true
+          # header_n ame:
+          #   name: Header-X
+          #   value: Value-X
+          #   always: false
+        custom_options:
+          - "ssl_client_certificate /etc/cloudflare-ssl/cloudflare.crt"
+          - "ssl_verify_client on"
+          - "set $skip_cache 0"
+          - |-
+            # POST requests and urls with a query string should always go to PHP
+            if ($request_method = POST) {
+                set $skip_cache 1;
+            }
+            if ($query_string != "") {
+                set $skip_cache 1;
+            }
+            # Don't cache uris containing the following segments
+            if ($request_uri ~* "/wp-admin/|/xmlrpc.php|wp-.*.php|/feed/|index.php|sitemap(_index)?.xml") {
+                set $skip_cache 1;
+            }
+            # Don't use the cache for logged in users or recent commenters
+            if ($http_cookie ~* "comment_author|wordpress_[a-f0-9]+|wp-postpass|wordpress_no_cache|wordpress_logged_in") {
+                set $skip_cache 1;
+            }
+            # WooCommerce pages in which shouldn't be cached
+            if ($request_uri ~* "/(cart|wishlist|checkout|my-account)/*$") {
+                set $skip_cache 1;
+            }
+            # Do not remove this line
+
+        web_server:
+          locations:
+            default:
+              location: /
+              include_files: []
+              proxy_hide_headers: []  # A list of headers which shouldn't be passed to the application
+              html_file_name: index index.php index.html index.htm
+              auth_basic: null
+              auth_basic_user_file: null
+              try_files: $uri $uri/ /index.php?$args
+            php:
+              location: ~ \.php$
+              include_files: [ snippets/fastcgi-php.conf ]
+              custom_options:
+                - "fastcgi_pass unix:/var/run/php/php7.3-fpm.sock"
+                - "fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name"
+                - "fastcgi_cache_bypass $skip_cache"
+                - "fastcgi_no_cache $skip_cache"
+                - "fastcgi_cache FASTCGICACHE"
+                - "fastcgi_cache_valid 60m"
+                - 'location ~* wp\-login\.php { limit_req zone=mylimit burst=1 nodelay; }'
+            cache:
+              location: ~* \.(css|js|ico|gif|jpeg|jpg|webp|png|svg|eot|otf|woff|woff2|ttf|ogg)$
+              add_headers:
+                cache_control:
+                  name: Cache-Control
+                  value: public
+                  always: false
+                pragma:
+                  name: pragma
+                  value: public
+                  always: false
+              custom_options:
+                - "expires max"
+                - "log_not_found off"
+            custom_options:
+              location: ~ \.ht
+              custom_options:
+                - "deny all"
+            restricted_uploads:
+              location:  ~* ^/wp-content/uploads/.*.(html|htm|shtml|php|js|swf)$
+              custom_options:
+                - "deny all"
+            wp_config:
+              location: ~* wp-config.php
+              custom_options:
+                - "deny all"
+            xmlrpc:
+              location: = /xmlrpc.php
+              custom_options:
+                - "deny all"
+                - "access_log off"
+                - "log_not_found off"
+            robots:
+              location: = /robots.txt
+              custom_options:
+                - "allow all"
+                - "log_not_found off"
+                - "access_log off"
+                - "set $skip_cache 0"
+            fav-icon:
+              location: = /favicon.ico
+              custom_options:
+                - "log_not_found off"
+                - "access_log off"
+          http_demo_conf: false
+
 # PHP role configuration
 php_packages_extra: #
   - php-mysql
@@ -113,5 +353,5 @@ mysql_packages:
   - python3-mysqldb
 mysql_enabled_on_startup: true
 mysql_user_home: /root
-mysql_user_name: Ch4ngeMe!
-mysql_user_password: root
+mysql_user_name: root
+mysql_user_password: Ch4ngeMe!

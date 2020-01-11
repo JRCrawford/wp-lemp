@@ -16,6 +16,21 @@
     name: webmaster
     comment: Web Master
     uid: 1100
+  register: webmaster_user
+
+- name: Securing webmaster home directory
+  file:
+    path: "{{ webmaster_user.home }}"
+    mode: 750
+
+- name: Create site folder for NGINX
+  file:
+    state: directory
+    path: "{{ webmaster_user.home }}/{{ domain_name }}"
+    owner: "{{ webmaster_user.name }}"
+    group: "{{ webmaster_user.group }}"
+    mode: 750
+
 
 - name: Install base packages
   apt: 
