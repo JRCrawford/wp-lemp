@@ -1,6 +1,19 @@
 ---
 
 domain_name: myhost.com
+lets_encrypt_email: "my@email.com"
+
+# Certbot role configuration
+certbot_create_if_missing: true
+certbot_auto_renew: true
+certbot_auto_renew_minute: "30"
+certbot_auto_renew_hour: "5"
+certbot_create_standalone_stop_services:
+  - nginx
+certbot_certs:
+  - email: "{{ lets_encrypt_email }}"
+    domains:
+      - "{{ domain_name }}"
 
 # Security role configuration
 security_ssh_port: 22
@@ -139,8 +152,8 @@ nginx_http_template:
             code: 301
             value: "$scheme://{{ domain_name }}$request_uri"
         ssl:
-          cert: "/etc/cloudflare-ssl/{{ domain_name }}.pem"
-          key: "/etc/cloudflare-ssl/{{ domain_name }}.key"
+          cert: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
+          key: /etc/letsencrypt/live/{{ domain_name }}/privkey.pem
           protocols: TLSv1.2
           ciphers: HIGH:!aNULL:!MD5
           prefer_server_ciphers: true
@@ -164,8 +177,8 @@ nginx_http_template:
               - http2
         server_name: "{{ domain_name }}"
         ssl:
-          cert: /etc/cloudflare-ssl/ideelnow.pem
-          key: /etc/cloudflare-ssl/ideelnow.key
+          cert: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
+          key: /etc/letsencrypt/live/{{ domain_name }}/privkey.pem
           protocols: TLSv1.2
           ciphers: HIGH:!aNULL:!MD5
           prefer_server_ciphers: true
@@ -266,7 +279,12 @@ nginx_http_template:
                 - "fastcgi_no_cache $skip_cache"
                 - "fastcgi_cache FASTCGICACHE"
                 - "fastcgi_cache_valid 60m"
-                - 'location ~* wp\-login\.php { limit_req zone=mylimit burst=1 nodelay; }'
+                - |-
+                  # Limit wp-login.php from brute force attacks
+                  location ~* wp\-login\.php {
+                    limit_req zone=mylimit burst=1 nodelay;
+                  }
+                  # Do not remove this line
             cache:
               location: ~* \.(css|js|ico|gif|jpeg|jpg|webp|png|svg|eot|otf|woff|woff2|ttf|ogg)$
               add_headers:
