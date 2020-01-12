@@ -9,7 +9,7 @@ certbot_auto_renew: true
 certbot_auto_renew_minute: "30"
 certbot_auto_renew_hour: "5"
 certbot_create_standalone_stop_services:
-  - nginx
+  - "{{ 'nginx' if ansible_facts.services['nginx'] is defined else '' }}"
 certbot_certs:
   - email: "{{ lets_encrypt_email }}"
     domains:

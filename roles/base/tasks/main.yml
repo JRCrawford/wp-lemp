@@ -48,4 +48,9 @@
     name: "{{ base_packages }}"
     state: present
 
+- name: Getting information about installed services
+  service_facts:
+
+  
+
 
