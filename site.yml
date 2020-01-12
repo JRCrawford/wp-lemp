@@ -1,11 +1,15 @@
 ---
 - hosts: all
   roles: 
-    - base
+    - role: base
+      become: yes
+    - geerlingguy.certbot
     - geerlingguy.security
     - geerlingguy.firewall
     - nginxinc.nginx
     - geerlingguy.php
     - geerlingguy.redis
     - role: geerlingguy.mysql
+      become: yes
+    - role: post
       become: yes

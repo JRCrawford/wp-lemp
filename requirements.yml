@@ -1,3 +1,4 @@
+- src: geerlingguy.certbot
 - src: geerlingguy.security
 - src: geerlingguy.firewall
 - src: geerlingguy.mysql

@@ -1,0 +1,20 @@
+---
+- name: Enable site configuration in NGINX
+  file:
+    state: link
+    src: "/etc/nginx/sites-available/{{ domain_name }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ domain_name }}.conf"
+  notify: "(Handler: All OSs) Reload NGINX"
+
+
+- name: Remove default site
+  file:
+    state: absent
+    path: "/etc/nginx/sites-available/default.conf"
+  notify: "(Handler: All OSs) Reload NGINX"
+
+- name: Remove default site symlink
+  file:
+    state: absent
+    path: "/etc/nginx/sites-enabled/default"
+  notify: "(Handler: All OSs) Reload NGINX"

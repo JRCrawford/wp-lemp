@@ -1,17 +1,14 @@
 ---
 - name: Update and upgrade all packages
-  become: true
   apt:
     upgrade: yes
     update_cache: yes
 
 - name: Remove dependencies that are no longer required 
-  become: true
   apt:
     autoremove: yes
 
 - name: Create a default webmaster user
-  become: true
   user:
     name: webmaster
     comment: Web Master
@@ -23,16 +20,37 @@
     path: "{{ webmaster_user.home }}"
     mode: 750
 
+- name: Registering site folder as a fact
+  set_fact:
+    site_folder: "{{ webmaster_user.home }}/{{ domain_name }}"
+
 - name: Create site folder for NGINX
   file:
     state: directory
-    path: "{{ webmaster_user.home }}/{{ domain_name }}"
+    path: "{{ site_folder }}"
     owner: "{{ webmaster_user.name }}"
     group: "{{ webmaster_user.group }}"
     mode: 750
 
+- name: Create a landing page
+  copy:
+    dest: "{{ site_folder }}/index.php"
+    content: |
+      <H1>Success</H1>
+      <em>The web server is working!</em>
+    force: no
+    owner: "{{ webmaster_user.name }}"
+    group: "{{ webmaster_user.group }}"
+    mode: 640
 
 - name: Install base packages
   apt: 
     name: "{{ base_packages }}"
     state: present
+
+- name: Getting information about installed services
+  service_facts:
+
+  
+
+
