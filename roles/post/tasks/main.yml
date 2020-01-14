@@ -6,7 +6,6 @@
     dest: "/etc/nginx/sites-enabled/{{ domain_name }}.conf"
   notify: "(Handler: All OSs) Reload NGINX"
 
-
 - name: Remove default site
   file:
     state: absent
@@ -18,3 +17,24 @@
     state: absent
     path: "/etc/nginx/sites-enabled/default"
   notify: "(Handler: All OSs) Reload NGINX"
+
+- name: Add webmaster user to www-data group
+  user:
+    name: "{{ webmaster_user_name }}"
+    append: true
+    groups:
+        - www-data
+  notify: "Restart NGINX"
+
+- name: Add www-data user to webmaster group
+  user:
+    name: www-data
+    append: true
+    groups:
+        - "{{ webmaster_user_name }}"
+  notify: "Restart PHP-FPM"
+
+- name: Test NGINX configuration
+  shell: "nginx -t"
+  register: nginx_config_test
+  failed_when: nginx_config_test.rc != 0
