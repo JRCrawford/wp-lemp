@@ -1,0 +1,4 @@
+roles/nginxinc.nginx
+roles/geerlingguy.*
+*.log
+.vagrant

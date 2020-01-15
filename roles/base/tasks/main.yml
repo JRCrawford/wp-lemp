@@ -1,0 +1,88 @@
+---
+- name: Update and upgrade all packages
+  apt:
+    upgrade: yes
+    update_cache: yes
+
+- name: Remove dependencies that are no longer required 
+  apt:
+    autoremove: yes
+
+- name: Create a default webmaster user
+  user:
+    name: "{{ webmaster_user_name }}"
+    comment: Web Master
+    uid: "{{ webmaster_user_uid }}"
+    password: "{{ webmaster_user_password | password_hash('sha512', 'salty') }}"
+    shell: "{{ webmaster_user_shell }}"
+  register: webmaster_user
+
+- name: Securing webmaster home directory
+  file:
+    path: "{{ webmaster_user.home }}"
+    mode: "{{ webmaster_user_home_mode }}"
+
+- name: Registering site_folder fact
+  set_fact:
+    site_folder: "{{ webmaster_user.home }}/{{ domain_name }}"
+
+- name: Register site directory structure facts
+  set_fact:
+    site_cache: "{{ site_folder }}/cache"
+    site_logs: "{{ site_folder }}/logs"
+    site_root: "{{ site_folder }}/public"
+
+- name: Create site folder for NGINX
+  file:
+    state: directory
+    path: "{{ site_folder }}"
+    owner: "{{ webmaster_user.name }}"
+    group: "{{ webmaster_user.group }}"
+    mode: 0750
+
+- name: Creating site logs folder
+  file:
+    state: directory
+    path: "{{ site_logs }}"
+    owner: "{{ webmaster_user.name }}"
+    group: "{{ webmaster_user.group }}"
+    mode: 0700
+
+- name: Creating site document root folder
+  file:
+    state: directory
+    path: "{{ site_root }}"
+    owner: "{{ webmaster_user.name }}"
+    group: "{{ webmaster_user.group }}"
+    mode: 0750
+
+- name: Creating site cache folder
+  file:
+    state: directory
+    path: "{{ site_cache }}"
+    owner: "{{ webmaster_user.name }}"
+    group: "{{ webmaster_user.group }}"
+    mode: 0750
+
+- name: Create a landing page
+  copy:
+    dest: "{{ site_root }}/index.php"
+    content: |
+      <H1>Success</H1>
+      <em>The web server is working!</em>
+    force: no
+    owner: "{{ webmaster_user.name }}"
+    group: "{{ webmaster_user.group }}"
+    mode: 0640
+
+- name: Install base packages
+  apt: 
+    name: "{{ base_packages }}"
+    state: present
+
+- name: Getting information about installed services
+  service_facts:
+
+  
+
+
