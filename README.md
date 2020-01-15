@@ -63,8 +63,9 @@ _Note that you will need to set the ansible ssh user and key/password for the ho
 Set the minimum required variables for each host by creating a @host_vars/webserver.mydomain.com@ file to set them
 
     $vim host_vars/webserver.mydomain.com
-        domain_name: public-domain-name.com
+        domain_name: public-domain-name.com  # Do not add www. to the public domain
         lets_encrypt_email: "your@letsencrypt-email.com"
+        webmaster_user_password: CatTouchThis!
         mysql_user_password: My5uper5ecurePass!
 
 _You can optionally define these in the inventory file but it's not recommended._
@@ -144,5 +145,5 @@ Don't forget to add your name to the acknoledgements list below.
 Acknowledgements
 ---
 
-geerlingguy for suppling and maintaining many great ansible roles.
-nginxinc for supplying and maintaining the nginx ansible role.
+* geerlingguy for suppling and maintaining many great ansible roles.
+* nginxinc for supplying and maintaining the nginx ansible role.
