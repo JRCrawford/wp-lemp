@@ -2,6 +2,7 @@
 
 domain_name: myhost.com
 lets_encrypt_email: "my@email.com"
+ssh_port: 22
 
 # Certbot role configuration
 certbot_create_if_missing: true
@@ -18,7 +19,7 @@ certbot_certs:
       - "www.{{ domain_name }}"
 
 # Security role configuration
-security_ssh_port: 22
+security_ssh_port: "{{ ssh_port }}"
 security_ssh_password_authentication: "yes"
 security_ssh_permit_root_login: "no"
 security_ssh_usedns: "no"
@@ -32,8 +33,7 @@ security_fail2ban_enabled: true
 firewall_state: started
 firewall_enabled_at_boot: true
 firewall_allowed_tcp_ports:
-  - "22"
-  - "3962"
+  - "{{ ssh_port }}"
   - "80"
   - "443"
 

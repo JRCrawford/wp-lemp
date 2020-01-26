@@ -36,12 +36,14 @@ Required to run the ansible playbook directly without using Vagrant:
 
     Ansible 2.8+
     Python 3
-    PyMySQL
+    PyMySQL (python module)
+    passlib (python module) [Only for MacOS]
+
 
 Required to provision a development VM locally using Vagrant:
 
-   Vagrant 2.2+
-   Virtualbox 5+
+    Vagrant 2.2+
+    Virtualbox 5+
 
 
 Getting Started
@@ -62,11 +64,13 @@ _Note that you will need to set the ansible ssh user and key/password for the ho
 
 Set the minimum required variables for each host by creating a @host_vars/webserver.mydomain.com@ file to set them
 
-    $vim host_vars/webserver.mydomain.com
-        domain_name: public-domain-name.com  # Do not add www. to the public domain
+    $ vim host_vars/webserver.mydomain.com
+        ---
+        domain_name: "public-domain-name.com"  # Do not add www. to the public domain
         lets_encrypt_email: "your@letsencrypt-email.com"
-        webmaster_user_password: CatTouchThis!
-        mysql_user_password: My5uper5ecurePass!
+        webmaster_user_password: "CatTouchThis!"
+        mysql_user_password: "My5uper5ecurePass!"
+	ssh_port: 1234 # Changes the default SSH port to this value
 
 _You can optionally define these in the inventory file but it's not recommended._
 _Optionally, override other default configuration found in group_vars/all.yml on a per host basis within the @host_vars/webserver.mydomain.com@ file._
