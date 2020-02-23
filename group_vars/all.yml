@@ -8,7 +8,7 @@ ssh_port: 22
 lets_encrypt_email: "my@email.com"
 
 # Certbot role configuration
-skip_certbo: "N" # Override with Y to skip CertBot installation and configuration
+skip_certbot: "N" # Override with Y to skip CertBot installation and configuration
 certbot_create_if_missing: true
 certbot_auto_renew_user: webmaster
 certbot_auto_renew: true
@@ -129,20 +129,17 @@ nginx_http_template:
         listen:
           listen_ipv4:
             port: 80
-            opts:
-              - http2
           listen_ipv6:
             ip: "[::]"
             port: 80
-            opts:
-              - http2
+        server_name: "_"
         returns:
           returns301:
             location: /
             code: 301
             value: "https://{{ domain_name }}$request_uri"
 
-      www:
+      tls:
         listen:
           listen_ipv4:
             port: 443
@@ -153,7 +150,7 @@ nginx_http_template:
             port: 443
             opts:
               - http2
-        server_name: "www.{{ domain_name }}"
+        server_name: "_"
         returns:
           returns301:
             location: /
