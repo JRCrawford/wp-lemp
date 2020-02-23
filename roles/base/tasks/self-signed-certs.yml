@@ -1,0 +1,45 @@
+- name: Install PyOpenSSL to generate certificates
+  package:
+    name: "python-cryptography"
+    state: present
+
+- name: Create puublic certificates directory if it doesn't exist
+  file:
+    path: "{{item}}" 
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+  with_list:
+    - /etc/ssl/certs
+    - /etc/ssl/csr
+
+- name: Create private certificates directroy if it doesn't exist
+  file:
+    path: /etc/ssl/private
+    mode: 0600
+    owner: root
+    group: root
+
+- name: Generate an OpenSSL private key
+  openssl_privatekey:
+    path: /etc/ssl/private/{{ domain_name }}.pem
+
+- name: Generate an OpenSSL CSR
+  openssl_csr:
+    path: /etc/ssl/csr/{{ domain_name }}.csr
+    privatekey_path: /etc/ssl/private/{{ domain_name }}.pem
+    common_name: "{{ domain_name }}"
+    subject:
+      commonName: "{{ domain_name }}"
+    subject_alt_name:
+      - "DNS:www.{{ domain_name }}"
+
+- name: Generate a Self Signed OpenSSL certificate
+  openssl_certificate:
+    path: /etc/ssl/certs/{{ domain_name }}.crt
+    privatekey_path: /etc/ssl/private/{{ domain_name }}.pem
+    csr_path: /etc/ssl/csr/{{ domain_name }}.csr
+    provider: selfsigned
+
+

@@ -1,10 +1,12 @@
 ---
 - hosts: all
+  vars_prompt:
   roles: 
     - role: base
       become: yes
     - role: geerlingguy.certbot
       become: yes
+      when: skip_certbot == "N"
     - role: geerlingguy.security
       become: yes
     - role: geerlingguy.firewall
