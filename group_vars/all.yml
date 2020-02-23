@@ -4,6 +4,7 @@ domain_name: myhost.com
 lets_encrypt_email: "my@email.com"
 
 # Certbot role configuration
+skip_certbo: "N" # Override with Y to skip CertBot installation and configuration
 certbot_create_if_missing: true
 certbot_auto_renew_user: webmaster
 certbot_auto_renew: true
@@ -155,8 +156,8 @@ nginx_http_template:
             code: 301
             value: "$scheme://{{ domain_name }}$request_uri"
         ssl:
-          cert: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
-          key: /etc/letsencrypt/live/{{ domain_name }}/privkey.pem
+          cert: "{% if skip_certbot == 'N' %}/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem{% else %}/etc/ssl/certs/{{ domain_name }}.crt{% endif %}"
+          key: "{% if skip_certbot == 'N' %}//etc/letsencrypt/live/{{ domain_name }}/privkey.pem{% else %}/etc/ssl/private/{{ domain_name }}.pem{% endif %}"
           protocols: TLSv1.2
           ciphers: HIGH:!aNULL:!MD5
           prefer_server_ciphers: true
@@ -180,8 +181,8 @@ nginx_http_template:
               - http2
         server_name: "{{ domain_name }}"
         ssl:
-          cert: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
-          key: /etc/letsencrypt/live/{{ domain_name }}/privkey.pem
+          cert: "{% if skip_certbot == 'N' %}/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem{% else %}/etc/ssl/certs/{{ domain_name }}.crt{% endif %}"
+          key: "{% if skip_certbot == 'N' %}//etc/letsencrypt/live/{{ domain_name }}/privkey.pem{% else %}/etc/ssl/private/{{ domain_name }}.pem{% endif %}"
           protocols: TLSv1.2
           ciphers: HIGH:!aNULL:!MD5
           prefer_server_ciphers: true
