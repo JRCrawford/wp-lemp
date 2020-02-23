@@ -1,6 +1,10 @@
 ---
 
+# Common variables that should be overriden on a per host basis
 domain_name: myhost.com
+mysql_super_user_password: ChangeM3!
+webmaster_user_password: ChangeM3!
+ssh_port: 22
 lets_encrypt_email: "my@email.com"
 
 # Certbot role configuration
@@ -372,6 +376,36 @@ mysql_packages:
   - mariadb-server
   - python3-mysqldb
 mysql_enabled_on_startup: true
-mysql_user_home: /root
-mysql_user_name: root
-mysql_user_password: Ch4ngeMe!
+mysql_user_home: /home/ubuntu
+mysql_user_name: ubuntu
+mysql_user_password: "{{ mysql_super_user_password }}"
+mysql_root_home: /root
+mysql_root_name: root
+mysql_root_password: "{{ mysql_super_user_password }}" 
+mysql_user_password_update: true
+mysql_root_password_update: true
+mysql_bind_address: "127.0.0.1"
+mysql_key_buffer_size: "{{ (ansible_memtotal_mb * 0.125)|int }}M"
+mysql_max_allowed_packet: "128M"
+mysql_table_open_cache: "256"
+mysql_sort_buffer_size: "2M"
+mysql_read_buffer_size: "2M"
+mysql_read_rnd_buffer_size: "4M"
+mysql_myisam_sort_buffer_size: "64M"
+mysql_thread_cache_size: "{{ ansible_processor_vcpus }}"
+mysql_query_cache_type: "0"
+mysql_query_cache_size: "16M"
+mysql_query_cache_limit: "1M"
+mysql_max_connections: "{{ ansible_processor_vcpus * 10 }}"
+mysql_tmp_table_size: "16M"
+mysql_max_heap_table_size: "16M"
+mysql_group_concat_max_len: "1024"
+mysql_join_buffer_size: "262144"
+mysql_innodb_file_per_table: "1"
+mysql_innodb_buffer_pool_size: "{{ (ansible_memtotal_mb * 0.25)|int }}M"
+mysql_innodb_log_file_size: "{{ (ansible_memtotal_mb * 0.061)|int }}M"
+mysql_innodb_log_buffer_size: "8M"
+mysql_innodb_flush_log_at_trx_commit: "1"
+mysql_innodb_lock_wait_timeout: "50"
+mysql_innodb_large_prefix: "1"
+mysql_innodb_file_format: "barracuda"
