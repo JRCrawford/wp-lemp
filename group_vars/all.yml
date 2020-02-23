@@ -1,9 +1,15 @@
 ---
 
+# Common variables that should be overriden on a per host basis
 domain_name: myhost.com
+mysql_super_user_password: ChangeM3!
+webmaster_user_password: ChangeM3!
+ssh_port: 22
 lets_encrypt_email: "my@email.com"
+ssh_port: 22
 
 # Certbot role configuration
+skip_certbot: "N" # Override with Y to skip CertBot installation and configuration
 certbot_create_if_missing: true
 certbot_auto_renew_user: webmaster
 certbot_auto_renew: true
@@ -18,7 +24,7 @@ certbot_certs:
       - "www.{{ domain_name }}"
 
 # Security role configuration
-security_ssh_port: 22
+security_ssh_port: "{{ ssh_port }}"
 security_ssh_password_authentication: "yes"
 security_ssh_permit_root_login: "no"
 security_ssh_usedns: "no"
@@ -32,8 +38,7 @@ security_fail2ban_enabled: true
 firewall_state: started
 firewall_enabled_at_boot: true
 firewall_allowed_tcp_ports:
-  - "22"
-  - "3962"
+  - "{{ ssh_port }}"
   - "80"
   - "443"
 
@@ -124,20 +129,17 @@ nginx_http_template:
         listen:
           listen_ipv4:
             port: 80
-            opts:
-              - http2
           listen_ipv6:
             ip: "[::]"
             port: 80
-            opts:
-              - http2
+        server_name: "_"
         returns:
           returns301:
             location: /
             code: 301
             value: "https://{{ domain_name }}$request_uri"
 
-      www:
+      tls:
         listen:
           listen_ipv4:
             port: 443
@@ -148,15 +150,15 @@ nginx_http_template:
             port: 443
             opts:
               - http2
-        server_name: "www.{{ domain_name }}"
+        server_name: "_"
         returns:
           returns301:
             location: /
             code: 301
             value: "$scheme://{{ domain_name }}$request_uri"
         ssl:
-          cert: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
-          key: /etc/letsencrypt/live/{{ domain_name }}/privkey.pem
+          cert: "{% if skip_certbot == 'N' %}/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem{% else %}/etc/ssl/certs/{{ domain_name }}.crt{% endif %}"
+          key: "{% if skip_certbot == 'N' %}//etc/letsencrypt/live/{{ domain_name }}/privkey.pem{% else %}/etc/ssl/private/{{ domain_name }}.pem{% endif %}"
           protocols: TLSv1.2
           ciphers: HIGH:!aNULL:!MD5
           prefer_server_ciphers: true
@@ -180,8 +182,8 @@ nginx_http_template:
               - http2
         server_name: "{{ domain_name }}"
         ssl:
-          cert: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
-          key: /etc/letsencrypt/live/{{ domain_name }}/privkey.pem
+          cert: "{% if skip_certbot == 'N' %}/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem{% else %}/etc/ssl/certs/{{ domain_name }}.crt{% endif %}"
+          key: "{% if skip_certbot == 'N' %}//etc/letsencrypt/live/{{ domain_name }}/privkey.pem{% else %}/etc/ssl/private/{{ domain_name }}.pem{% endif %}"
           protocols: TLSv1.2
           ciphers: HIGH:!aNULL:!MD5
           prefer_server_ciphers: true
@@ -371,6 +373,36 @@ mysql_packages:
   - mariadb-server
   - python3-mysqldb
 mysql_enabled_on_startup: true
-mysql_user_home: /root
-mysql_user_name: root
-mysql_user_password: Ch4ngeMe!
+mysql_user_home: /home/ubuntu
+mysql_user_name: ubuntu
+mysql_user_password: "{{ mysql_super_user_password }}"
+mysql_root_home: /root
+mysql_root_name: root
+mysql_root_password: "{{ mysql_super_user_password }}" 
+mysql_user_password_update: true
+mysql_root_password_update: true
+mysql_bind_address: "127.0.0.1"
+mysql_key_buffer_size: "{{ (ansible_memtotal_mb * 0.125)|int }}M"
+mysql_max_allowed_packet: "128M"
+mysql_table_open_cache: "256"
+mysql_sort_buffer_size: "2M"
+mysql_read_buffer_size: "2M"
+mysql_read_rnd_buffer_size: "4M"
+mysql_myisam_sort_buffer_size: "64M"
+mysql_thread_cache_size: "{{ ansible_processor_vcpus }}"
+mysql_query_cache_type: "0"
+mysql_query_cache_size: "16M"
+mysql_query_cache_limit: "1M"
+mysql_max_connections: "{{ ansible_processor_vcpus * 10 }}"
+mysql_tmp_table_size: "16M"
+mysql_max_heap_table_size: "16M"
+mysql_group_concat_max_len: "1024"
+mysql_join_buffer_size: "262144"
+mysql_innodb_file_per_table: "1"
+mysql_innodb_buffer_pool_size: "{{ (ansible_memtotal_mb * 0.25)|int }}M"
+mysql_innodb_log_file_size: "{{ (ansible_memtotal_mb * 0.061)|int }}M"
+mysql_innodb_log_buffer_size: "8M"
+mysql_innodb_flush_log_at_trx_commit: "1"
+mysql_innodb_lock_wait_timeout: "50"
+mysql_innodb_large_prefix: "1"
+mysql_innodb_file_format: "barracuda"

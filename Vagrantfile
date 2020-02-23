@@ -13,8 +13,8 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--ioapic", "on"]
   end
 
-  config.vm.network "forwarded_port", guest: 80, host: 80
-  config.vm.network "forwarded_port", guest: 443, host: 443
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 443, host: 8443
 
 
 
@@ -24,6 +24,6 @@ Vagrant.configure("2") do |config|
     ansible.playbook = "site.yml"
     ansible.galaxy_command = "ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path}"
     ansible.compatibility_mode = "2.0"
-    # ansible.raw_arguments = "-vv"
+    ansible.raw_arguments = "-e skip_certbot=Y"
   end
 end
