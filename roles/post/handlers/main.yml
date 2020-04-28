@@ -7,5 +7,5 @@
 
 - name: "Restart PHP-FPM"
   service:
-    name: php7.2-fpm
+    name: "php{{ php_default_version_debian }}-fpm"
     state: restarted

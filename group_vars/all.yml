@@ -7,6 +7,9 @@ webmaster_user_password: ChangeM3!
 ssh_port: 22
 lets_encrypt_email: "my@email.com"
 
+
+ansible_python_interpreter: /usr/bin/python3
+
 # Certbot role configuration
 skip_certbot: "N" # Override with Y to skip CertBot installation and configuration
 certbot_create_if_missing: true
@@ -84,7 +87,7 @@ nginx_main_template:
     - "types_hash_max_size 2048"
     - "gzip on"
     - "gzip_types text/plain text/css application/json application/javascript text/xml text/javascript"
-    - "ssl_protocols TLSv1.2"
+    - "ssl_protocols TLSv1.2 TLSv1.3"
     - "ssl_prefer_server_ciphers on"
     - "include /etc/nginx/sites-enabled/*"
     - "set_real_ip_from 103.21.244.0/22"
@@ -145,11 +148,13 @@ nginx_http_template:
             port: 443
             opts:
               - http2
+            ssl: true
           listen_ipv6:
             ip: "[::]"
             port: 443
             opts:
               - http2
+            ssl: true
         server_name: "_"
         returns:
           returns301:
@@ -159,7 +164,7 @@ nginx_http_template:
         ssl:
           cert: "{% if skip_certbot == 'N' %}/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem{% else %}/etc/ssl/certs/{{ domain_name }}.crt{% endif %}"
           key: "{% if skip_certbot == 'N' %}//etc/letsencrypt/live/{{ domain_name }}/privkey.pem{% else %}/etc/ssl/private/{{ domain_name }}.pem{% endif %}"
-          protocols: TLSv1.2
+          protocols: TLSv1.2 TLSv1.3
           ciphers: HIGH:!aNULL:!MD5
           prefer_server_ciphers: true
           session_cache: shared:SSL:10m
@@ -175,16 +180,18 @@ nginx_http_template:
             port: 443
             opts:
               - http2
+            ssl: true
           listen_ipv6:
             ip: "[::]"
             port: 443
             opts:
               - http2
+            ssl: true
         server_name: "{{ domain_name }}"
         ssl:
           cert: "{% if skip_certbot == 'N' %}/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem{% else %}/etc/ssl/certs/{{ domain_name }}.crt{% endif %}"
           key: "{% if skip_certbot == 'N' %}//etc/letsencrypt/live/{{ domain_name }}/privkey.pem{% else %}/etc/ssl/private/{{ domain_name }}.pem{% endif %}"
-          protocols: TLSv1.2
+          protocols: TLSv1.2 TLSv1.3
           ciphers: HIGH:!aNULL:!MD5
           prefer_server_ciphers: true
           session_cache: shared:SSL:10m
@@ -349,7 +356,7 @@ php_packages_extra: #
   - php-soap
   - php-zip
 php_enable_webserver: false
-php_default_version_debian: "7.2"
+php_default_version_debian: "{{ (ansible_distribution_release == 'focal') | ternary(7.4, 7.2) }}"
 php_install_recommends: false
 php_enable_php_fpm: true
 php_max_execution_time: "300"
@@ -372,6 +379,7 @@ mysql_packages:
   - mariadb-client
   - mariadb-server
   - python3-mysqldb
+mysql_python_package_debian: python3-mysqldb
 mysql_enabled_on_startup: true
 mysql_user_home: /home/ubuntu
 mysql_user_name: ubuntu
