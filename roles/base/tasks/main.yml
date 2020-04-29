@@ -80,8 +80,5 @@
     name: "{{ base_packages }}"
     state: present
 
-- name: Getting information about installed services
-  service_facts:
-
 - include_tasks: self-signed-certs.yml
   when: skip_certbot != "N"

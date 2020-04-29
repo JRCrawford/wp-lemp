@@ -4,3 +4,4 @@ webmaster_user_password: Ch4ngeMe!
 webmaster_user_shell: /bin/bash
 webmaster_user_uid: 1100
 webmaster_user_home_mode: 0750
+skip_cert_bot: "no"
