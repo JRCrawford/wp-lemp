@@ -1,7 +1,7 @@
 Ansible LEMP + Redis Stack
 ==========================
 
-Ansible playbook that sets up a LEMP (Linux NGINX MariaDB PHP) and Redis stack on an Ubuntu 18.04 system.  In addition, it partially hardens the install using decent default options.
+Ansible playbook that sets up a LEMP (Linux NGINX MariaDB PHP) and Redis stack on an Ubuntu 18.04 or 20.04 system.  In addition, it partially hardens the install using decent default options.
 
 Overview of what this playbook does:
 * Security
@@ -9,7 +9,7 @@ Overview of what this playbook does:
     * Sets up automated security patching
     * Configures fail2ban
     * Enables the host firewall and restricts all ports except SSH, HTTP, and HTTPS
-* Sets up CertBot
+* Sets up CertBot or Self-Signed Certificates
     * Creates a TLS certificate for the server's domain
     * Gets the certificate signed by LetsEncrypt
 * Installs PHP and PHP-FPM
@@ -86,7 +86,32 @@ Configurable Options
 
 Much of the functionality in this playbook is obtained from advanced ansible roles that provide a significant amount of customization using role variables.  This playbook defines working defaults in the @group_vars/all@ file but can be modified and/or extended.
 
-To view the available options, consult the following ansible roles' documentation:
+
+Modifies the webmaster user name, password, shell, user id, and home directory mode.  Note that the static HTML/JS and dynamic PHP pages are stored relative to the home directory of this user (i.e. /home/webmaster/<domain name>/public)
+
+    webmaster_user_name: webmaster
+    webmaster_user_password: Ch4ngeMe!
+    webmaster_user_shell: /bin/bash
+    webmaster_user_uid: 1100
+    webmaster_user_home_mode: 0750
+
+Modifies the hostname served by the VM.  This can be any FQDN.
+
+    domain_name: myhost.com
+
+Sets the mysql super user password (i.e. root account).
+
+    mysql_super_user_password: ChangeM3!
+
+Email address to use with letsEncrypt to generate signed TLS certificates:
+
+    lets_encrypt_email: "my@email.com"
+
+Use self-signed certificates rather than letsEncrypt:
+
+    skip_certbot: "no"
+
+To view the available options for the various roles, consult the following ansible roles' documentation:
 
 * [geerlingguy.security](https://github.com/geerlingguy/ansible-role-security)
 * [geerlingguy.firewall](https://github.com/geerlingguy/ansible-role-firewall)

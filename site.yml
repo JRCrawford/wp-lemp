@@ -6,7 +6,7 @@
       become: yes
     - role: geerlingguy.certbot
       become: yes
-      when: skip_certbot == "N"
+      when: skip_certbot == "no"
     - role: geerlingguy.security
       become: yes
     - role: geerlingguy.firewall

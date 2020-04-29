@@ -7,11 +7,13 @@ webmaster_user_password: ChangeM3!
 ssh_port: 22
 lets_encrypt_email: "my@email.com"
 
+# Installs google authenticator and configures it in PAM
+skip_google_auth: "no"
 
 ansible_python_interpreter: /usr/bin/python3
 
 # Certbot role configuration
-skip_certbot: "N" # Override with Y to skip CertBot installation and configuration
+skip_certbot: "no" # Override with yes to skip CertBot installation and configuration
 certbot_create_if_missing: true
 certbot_auto_renew_user: webmaster
 certbot_auto_renew: true
@@ -29,6 +31,7 @@ certbot_certs:
 security_ssh_port: 22
 security_ssh_password_authentication: "yes"
 security_ssh_permit_root_login: "no"
+security_ssh_challenge_response_auth: "no"
 security_ssh_usedns: "no"
 security_autoupdate_enabled: true
 security_autoupdate_reboot: true
