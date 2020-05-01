@@ -165,8 +165,8 @@ nginx_http_template:
             code: 301
             value: "$scheme://{{ domain_name }}$request_uri"
         ssl:
-          cert: "{% if skip_certbot == 'N' %}/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem{% else %}/etc/ssl/certs/{{ domain_name }}.crt{% endif %}"
-          key: "{% if skip_certbot == 'N' %}//etc/letsencrypt/live/{{ domain_name }}/privkey.pem{% else %}/etc/ssl/private/{{ domain_name }}.pem{% endif %}"
+          cert: "{% if skip_certbot == 'no' %}/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem{% else %}/etc/ssl/certs/{{ domain_name }}.crt{% endif %}"
+          key: "{% if skip_certbot == 'no' %}//etc/letsencrypt/live/{{ domain_name }}/privkey.pem{% else %}/etc/ssl/private/{{ domain_name }}.pem{% endif %}"
           protocols: TLSv1.2 TLSv1.3
           ciphers: HIGH:!aNULL:!MD5
           prefer_server_ciphers: true
@@ -192,8 +192,8 @@ nginx_http_template:
             ssl: true
         server_name: "{{ domain_name }}"
         ssl:
-          cert: "{% if skip_certbot == 'N' %}/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem{% else %}/etc/ssl/certs/{{ domain_name }}.crt{% endif %}"
-          key: "{% if skip_certbot == 'N' %}//etc/letsencrypt/live/{{ domain_name }}/privkey.pem{% else %}/etc/ssl/private/{{ domain_name }}.pem{% endif %}"
+          cert: "{% if skip_certbot == 'no' %}/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem{% else %}/etc/ssl/certs/{{ domain_name }}.crt{% endif %}"
+          key: "{% if skip_certbot == 'no' %}//etc/letsencrypt/live/{{ domain_name }}/privkey.pem{% else %}/etc/ssl/private/{{ domain_name }}.pem{% endif %}"
           protocols: TLSv1.2 TLSv1.3
           ciphers: HIGH:!aNULL:!MD5
           prefer_server_ciphers: true
@@ -295,6 +295,7 @@ nginx_http_template:
                 - |-
                   # Limit wp-login.php from brute force attacks
                   location ~* wp\-login\.php {
+                    fastcgi_pass 127.0.0.1:9000;
                     limit_req zone=mylimit burst=1 nodelay;
                   }
                   # Do not remove this line
