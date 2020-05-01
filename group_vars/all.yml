@@ -295,6 +295,7 @@ nginx_http_template:
                 - |-
                   # Limit wp-login.php from brute force attacks
                   location ~* wp\-login\.php {
+                    fastcgi_pass 127.0.0.1:9000;
                     limit_req zone=mylimit burst=1 nodelay;
                   }
                   # Do not remove this line
